@@ -19,6 +19,9 @@
 #include "registers.h"
 #include "../../debugger/io.h"
 
+#define OPCODE_MASK 0xFFC0u
+#define OPCODE_CALL_INSTRUCTION 0x1280u
+
 //##########+++ MSP430 Register initialization +++##########
 void initialize_msp_registers(Emulator* const emu)
 {
@@ -210,14 +213,9 @@ void update_cpu_stats(Emulator* const emu)
     if (emu->do_trace)
     {
       sprintf(buffer, "New SP low watermark - %04X\n", emu->cpu->sp);
-      //print_console(emu, buffer);
+      print_console(emu, buffer);
     }
     emu->cpu->stats.spLowWatermark = emu->cpu->sp;
-  }
-  if (emu->cpu->stats.spLastValue != emu->cpu->sp && emu->do_trace)
-  {
-    sprintf(buffer, "SP - [%04X] == %04X\n", emu->cpu->sp, *get_addr_ptr(emu->cpu->sp));
-    //print_console(emu, buffer);
   }
 
   emu->cpu->stats.spLastValue = emu->cpu->sp;
@@ -276,9 +274,8 @@ static void reportReturn(Emulator* const emu)
 void report_instruction_execution(Emulator* const emu, const uint16_t instruction)
 {
   Cpu* const cpu = emu->cpu;
-  const uint16_t opcode = instruction & 0xFFC0u;
-  // Call instruction
-  if (opcode == 0x1280u)
+  const uint16_t opcode = instruction & OPCODE_MASK;
+  if (opcode == OPCODE_CALL_INSTRUCTION)
   {
     cpu->callTracer.calls[cpu->callTracer.callDepth].returnPc = *get_addr_ptr(cpu->sp);
     // SP + 2 to accomodate PC presence on the stack
