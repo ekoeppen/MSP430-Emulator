@@ -41,20 +41,23 @@ typedef struct Status_reg {
   uint16_t reserved : 7;   // Reserved bits
 } __attribute__((packed)) Status_reg;
 
+// Structure describing call information //
 typedef struct CallEntry {
-  uint16_t targetPc;
-  uint16_t returnPc;
-  uint16_t sp;
+  uint16_t targetPc; // Target call PC
+  uint16_t returnPc; // Return PC (one instruction after the call)
+  uint16_t sp;       // SP value at the time of the call
 } CallEntry;
 
+// Structure containing data for call tracing //
 typedef struct CallTracer {
-  CallEntry calls[CallTracer_MaxCallDepth];
-  uint32_t callDepth;
+  CallEntry calls[CallTracer_MaxCallDepth]; // Call stack
+  uint32_t callDepth;                       // Current call stack depth
 } CallTracer;
 
+// Structure containing CPU statistics //
 typedef struct CpuStats {
-  uint16_t spLowWatermark;
-  uint16_t spLastValue;
+  uint16_t spLowWatermark; // The lowest recorded SP value
+  uint16_t spLastValue;    // Last SP value
 } CpuStats;
 
 // Main CPU structure //
@@ -78,15 +81,15 @@ typedef struct Cpu {
   CpuStats stats;
 } Cpu;
 
-Status_reg get_sr_fields (Emulator *emu);
-void set_sr_from_fields(Emulator *emu, const Status_reg fields);
-void initialize_msp_registers (Emulator *emu);
-void update_register_display (Emulator *emu);
-void update_cpu_stats(Emulator *emu);
-void display_cpu_stats(Emulator *emu);
-void reset_cpu_stats(Emulator *emu);
-void reset_call_tracer(Emulator* emu);
-void report_instruction_execution(Emulator* emu, const uint16_t instruction);
+Status_reg get_sr_fields (Emulator* const emu);
+void set_sr_from_fields(Emulator* const emu, const Status_reg fields);
+void initialize_msp_registers (Emulator* const emu);
+void update_register_display (Emulator* const emu);
+void update_cpu_stats(Emulator* const emu);
+void display_cpu_stats(Emulator* const emu);
+void reset_cpu_stats(Emulator* const emu);
+void reset_call_tracer(Emulator* const emu);
+void report_instruction_execution(Emulator* const emu, const uint16_t instruction);
 
 
 #endif

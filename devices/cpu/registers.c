@@ -20,7 +20,7 @@
 #include "../../debugger/io.h"
 
 //##########+++ MSP430 Register initialization +++##########
-void initialize_msp_registers(Emulator *emu)
+void initialize_msp_registers(Emulator* const emu)
 {
   Cpu *cpu = emu->cpu;
   Debugger *debugger = emu->debugger;
@@ -46,7 +46,7 @@ void initialize_msp_registers(Emulator *emu)
   reset_call_tracer(emu);
 }
 
-void update_register_display (Emulator *emu)
+void update_register_display (Emulator* const emu)
 {
   Cpu *cpu = emu->cpu;
   char thing[50] = "....";
@@ -106,7 +106,7 @@ void update_register_display (Emulator *emu)
   send_control(emu, UPDATE_REG_R15_PACKET, (void *)thing, strlen(thing));
 }
 
-Status_reg get_sr_fields (Emulator *emu)
+Status_reg get_sr_fields (Emulator* const emu)
 {
   Cpu *cpu = emu->cpu;
   uint16_t value = cpu->sr;
@@ -135,7 +135,7 @@ Status_reg get_sr_fields (Emulator *emu)
   return fields;
 }
 
-void set_sr_from_fields(Emulator *emu, const Status_reg fields)
+void set_sr_from_fields(Emulator* const emu, const Status_reg fields)
 {
   Cpu *cpu = emu->cpu;
   uint16_t r2 = 0;
@@ -202,9 +202,9 @@ void set_sr_from_fields(Emulator *emu, const Status_reg fields)
   cpu->sr = r2;
 }
 
-void update_cpu_stats(Emulator *emu)
+void update_cpu_stats(Emulator* const emu)
 {
-  char buffer[1024];
+  char buffer[STRING_BUFFER_SIZE];
   if (emu->cpu->stats.spLowWatermark > emu->cpu->sp)
   {
     if (emu->do_trace)
@@ -223,52 +223,69 @@ void update_cpu_stats(Emulator *emu)
   emu->cpu->stats.spLastValue = emu->cpu->sp;
 }
 
-void display_cpu_stats(Emulator *emu)
+void display_cpu_stats(Emulator* const emu)
 {
-  char stats[1024];
+  char stats[STRING_BUFFER_SIZE];
   sprintf(stats, "CPU stats:\n \tSP low watermark - %04X\n",
     emu->cpu->stats.spLowWatermark);
   print_console(emu, stats);
 }
 
-void reset_cpu_stats(Emulator *emu)
+void reset_cpu_stats(Emulator* const emu)
 {
   emu->cpu->stats.spLowWatermark = 0xFFFF;
   emu->cpu->stats.spLastValue = 0xFFFF;
 }
 
-void reset_call_tracer(Emulator* emu)
+void reset_call_tracer(Emulator* const emu)
 {
   emu->cpu->callTracer.callDepth = 0;
 }
 
-static void print_spaces(Emulator* emu, const uint8_t count)
+static void print_spaces(Emulator* const emu, const uint8_t count)
 {
   for (uint8_t i = 0; i < count; i++)
     print_console(emu, " ");
 }
 
-void report_instruction_execution(Emulator* emu, const uint16_t instruction)
+static void reportCall(Emulator* const emu)
 {
-  char buffer[1024];  
+  char buffer[STRING_BUFFER_SIZE];
+  Cpu* const cpu = emu->cpu;
+  print_spaces(emu, cpu->callTracer.callDepth);
+  sprintf(buffer, "Call from %04X to %04X; [SP] == %04X\n",
+    cpu->callTracer.calls[cpu->callTracer.callDepth].returnPc,
+    cpu->callTracer.calls[cpu->callTracer.callDepth].targetPc,
+    cpu->callTracer.calls[cpu->callTracer.callDepth].sp);
+  print_console(emu, buffer);
+}
+
+static void reportReturn(Emulator* const emu)
+{
+  char buffer[STRING_BUFFER_SIZE];
+  Cpu* const cpu = emu->cpu;
+  print_spaces(emu, cpu->callTracer.callDepth);
+  sprintf(buffer, "Return from %04X to %04X; [SP] == %04X, was %04X\n",
+    cpu->callTracer.calls[cpu->callTracer.callDepth].targetPc,
+    cpu->callTracer.calls[cpu->callTracer.callDepth].returnPc,
+    cpu->sp,
+    cpu->callTracer.calls[cpu->callTracer.callDepth].sp);
+  print_console(emu, buffer);
+}
+
+void report_instruction_execution(Emulator* const emu, const uint16_t instruction)
+{
   Cpu* const cpu = emu->cpu;
   const uint16_t opcode = instruction & 0xFFC0u;
   // Call instruction
   if (opcode == 0x1280u)
   {
     cpu->callTracer.calls[cpu->callTracer.callDepth].returnPc = *get_addr_ptr(cpu->sp);
-    // SP + 2 to accomodate PC already on the stack
+    // SP + 2 to accomodate PC presence on the stack
     cpu->callTracer.calls[cpu->callTracer.callDepth].sp = cpu->sp + 2;
     cpu->callTracer.calls[cpu->callTracer.callDepth].targetPc = cpu->pc;
     if (emu->do_trace)
-    {
-      print_spaces(emu, cpu->callTracer.callDepth);
-      sprintf(buffer, "Call from %04X to %04X; [SP] == %04X\n",
-        cpu->callTracer.calls[cpu->callTracer.callDepth].returnPc,
-        cpu->callTracer.calls[cpu->callTracer.callDepth].targetPc,
-        cpu->callTracer.calls[cpu->callTracer.callDepth].sp);
-      print_console(emu, buffer);
-    }
+      reportCall(emu);
     cpu->callTracer.callDepth++;
   }
   else if (cpu->callTracer.callDepth > 0)
@@ -277,21 +294,14 @@ void report_instruction_execution(Emulator* emu, const uint16_t instruction)
     {
       cpu->callTracer.callDepth--;
       const bool hasSpChanged = cpu->callTracer.calls[cpu->callTracer.callDepth].sp != cpu->sp;
+      // SP change upon return is an error
       if (hasSpChanged)
       {
         cpu->running = false;
         emu->debugger->debug_mode = true;
       }
       if (emu->do_trace || hasSpChanged)
-      {
-        print_spaces(emu, cpu->callTracer.callDepth);
-        sprintf(buffer, "Return from from %04X to %04X; [SP] == %04X, was %04X\n",
-          cpu->callTracer.calls[cpu->callTracer.callDepth].targetPc,
-          cpu->callTracer.calls[cpu->callTracer.callDepth].returnPc,
-          cpu->sp,
-          cpu->callTracer.calls[cpu->callTracer.callDepth].sp);
-        print_console(emu, buffer);
-      }
+        reportReturn(emu);
     }
   }
 }
