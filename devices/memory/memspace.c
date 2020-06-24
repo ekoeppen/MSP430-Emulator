@@ -30,10 +30,10 @@ uint8_t* PER16;      /* 16-bit peripherals */
 uint8_t* PER8;       /* 8-bit peripherals */
 uint8_t* SFRS;       /* Special Function Registers */
 
-static int32_t getEffectiveAddressIndex(void* offset)
+static int32_t getEffectiveAddressIndex(void* const offset)
 {
-  intptr_t offsetIndex = (intptr_t)offset;
-  intptr_t memoryIndex = (intptr_t)MEMSPACE;
+  const intptr_t offsetIndex = (intptr_t)offset;
+  const intptr_t memoryIndex = (intptr_t)MEMSPACE;
 
   if (offsetIndex < memoryIndex)
     return -1;
@@ -109,7 +109,7 @@ void initialize_msp_memspace()
 
 uint8_t memory_read_byte(void* const address)
 {
-  int32_t index = getEffectiveAddressIndex(address);
+  const int32_t index = getEffectiveAddressIndex(address);
   if (index >= 0)
     MEMSPACE_FLAGS[index] |= (uint8_t)MemoryCell_Flag_Read;
   return *(uint8_t*)address;
@@ -117,7 +117,7 @@ uint8_t memory_read_byte(void* const address)
 
 uint16_t memory_read_word(void* const address)
 {
-  int32_t index = getEffectiveAddressIndex(address);
+  const int32_t index = getEffectiveAddressIndex(address);
   if (index >= 0)
    {
       MEMSPACE_FLAGS[index] |= (uint8_t)MemoryCell_Flag_Read;
@@ -128,7 +128,7 @@ uint16_t memory_read_word(void* const address)
 
 void memory_write_byte(void* const address, const uint8_t x)
 {
-  int32_t index = getEffectiveAddressIndex(address);
+  const int32_t index = getEffectiveAddressIndex(address);
   if (index >= 0)
     MEMSPACE_FLAGS[index] |= (uint8_t)MemoryCell_Flag_Written;
   (*(uint8_t*)address) = x;
@@ -136,19 +136,18 @@ void memory_write_byte(void* const address, const uint8_t x)
 
 void memory_write_word(void* const address, const uint16_t x)
 {
-  int32_t index = getEffectiveAddressIndex(address);
+  const int32_t index = getEffectiveAddressIndex(address);
   if (index >= 0)
   {
     MEMSPACE_FLAGS[index] |= (uint8_t)MemoryCell_Flag_Written;
     MEMSPACE_FLAGS[index + 1] |= (uint8_t)MemoryCell_Flag_Written;
-    //printf("Write [%04X] <- %04X\n", index, x);
-  }  
+  }
   (*(uint16_t*)address) = x;
 }
 
 uint8_t memory_get_flags(void* const address)
 {
-  int32_t index = getEffectiveAddressIndex(address);
+  const int32_t index = getEffectiveAddressIndex(address);
   if (index >= 0)
     return MEMSPACE_FLAGS[index];
   return 0;
@@ -156,7 +155,7 @@ uint8_t memory_get_flags(void* const address)
 
 uint8_t memory_get_flags_of_virtual_address(void* const address)
 {
-  uintptr_t index = (uintptr_t)address;
+  const uintptr_t index = (uintptr_t)address;
   if (index >= ADDRESS_SPACE_SIZE)
     return 0;
   return MEMSPACE_FLAGS[index];
@@ -164,7 +163,7 @@ uint8_t memory_get_flags_of_virtual_address(void* const address)
 
 void memory_clear_flags(void* const address)
 {
-  int32_t index = getEffectiveAddressIndex(address);
+  const int32_t index = getEffectiveAddressIndex(address);
   if (index >= 0)
     MEMSPACE_FLAGS[index] = 0;
 }
