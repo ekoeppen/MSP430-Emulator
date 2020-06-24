@@ -66,7 +66,6 @@ void dump_memory(Emulator *emu, uint8_t *MEM, uint32_t size,
 
 void handle_sigint(int signal);
 
-bool command_loop(Emulator *emu, char *buf, int len);
 bool exec_cmd (Emulator *emu, char *buf, int len);
 
 bool handle_breakpoints (Emulator *emu);

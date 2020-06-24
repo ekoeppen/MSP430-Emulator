@@ -114,10 +114,10 @@ bool exec_cmd (Emulator *emu, char *line, int len)
       ops = sscanf(line, "%s %u %X", bogus1, &bogus2, &bogus3);
 
       if (ops == 2) {
-  sscanf(line, "%s %u", bogus1, &num);
+        sscanf(line, "%s %u", bogus1, &num);
       }
       else if (ops == 3) {
-  sscanf(line, "%s %u %hX", bogus1, &num,
+        sscanf(line, "%s %u %hX", bogus1, &num,
          (uint16_t *)&start_addr);
       }
 
@@ -134,12 +134,12 @@ bool exec_cmd (Emulator *emu, char *line, int len)
 
       // Is it a direct address or an adress in a register being spec'd
       if (str[0] >= '0' && str[0] <= '9') {
-  sscanf(str, "%X", (unsigned int *) &start_addr);
+        sscanf(str, "%X", (unsigned int *) &start_addr);
       }
       else if (str[0] == '%' || str[0] == 'r' || str[0] == 'R')
       {
         uint16_t *p = (uint16_t *)get_reg_ptr(emu, reg_name_to_num(str));
-      start_addr = *p;
+        start_addr = *p;
       }
 
       stride = BYTE_STRIDE;
@@ -165,23 +165,23 @@ bool exec_cmd (Emulator *emu, char *line, int len)
       int res = reg_name_to_num(reg_name_or_addr);
 
       if (res != -1) {  // If its a reg name
-  reg_name = reg_name_or_addr;
-  printf("In reg part...\n");
+        reg_name = reg_name_or_addr;
+        printf("In reg part...\n");
 
-  uint16_t *p = (uint16_t*)get_reg_ptr(emu, res);
-  *p = value;
+        uint16_t *p = (uint16_t*)get_reg_ptr(emu, res);
+        *p = value;
 
-  display_registers(emu);
-  disassemble(emu, cpu->pc, 1);
+        display_registers(emu);
+        disassemble(emu, cpu->pc, 1);
       }
       else {
-  addr_str = reg_name_or_addr;
-  printf("In addr part...\n");
+        addr_str = reg_name_or_addr;
+        printf("In addr part...\n");
 
-  uint16_t virtual_addr = (uint16_t) strtol(addr_str, NULL, 0);
+        uint16_t virtual_addr = (uint16_t) strtol(addr_str, NULL, 0);
 
-  uint16_t *p = get_addr_ptr(virtual_addr);
-  *p = value;
+        uint16_t *p = get_addr_ptr(virtual_addr);
+        *p = value;
       }
     }
 
@@ -281,215 +281,16 @@ bool exec_cmd (Emulator *emu, char *line, int len)
   // help, display a list of debugger cmds //
   else if ( !strncasecmp("help", cmd, sizeof "help") ||
       !strncasecmp("h", cmd, sizeof "h") )
-    {
-      display_help(emu);
-    }
+  {
+    display_help(emu);
+  }
 
   // End the line loop, next instruction
   else
-    {
-      print_console(emu, "\t[Invalid command, type \"help\".]\n");
-    }
-
-  return true;
-}
-
-/* Main command loop */
-bool command_loop (Emulator *emu, char *buf, int len)
-{
-  /*
-  Cpu *cpu = emu->cpu;
-  Debugger *debugger = emu->debugger;
-
-  static uint16_t breakpoint_addresses[MAX_BREAKPOINTS];
-  static uint8_t cur_bp_number = 0;
-
-  char cmd[512];
-  char *line;
-
-  // Check for breakpoints //
-  int i;
-  for (i = 0;i < cur_bp_number;i++) {
-    if (cpu->pc == breakpoint_addresses[i]) {
-      debugger->run = 0; // Stop fast execution //
-      debugger->debug_mode = true;
-      printf("\n\t[Breakpoint %d hit]\n\n", i + 1);
-      break;
-    }
+  {
+    print_console(emu, "\t[Invalid command, type \"help\".]\n");
   }
 
-  if (!debugger->disassemble_mode && debugger->debug_mode) {
-    display_registers(emu);
-    disassemble(emu, cpu->pc, 1);
-  }
-
-  while (!debugger->run) {
-    bzero(cmd, sizeof cmd);
-    line = readline("\n>> ");
-
-    if ( strlen(line) >= 1 ) {
-      add_history(line);
-      sscanf(line, "%s", cmd);
-      line += strlen(cmd) + 1;
-    }
-    else {
-      continue;
-    }
-
-    // reset the virtual machine
-    if ( !strncasecmp("reset", cmd, sizeof "reset") ||
-   !strncasecmp("restart", cmd, sizeof "restart")) {
-
-      cpu->pc = 0xC000;
-      break;
-    }
-    // s NUM_STEPS, step X instructions forward, defaults to 1
-    else if ( !strncasecmp("s", cmd, sizeof "s") ||
-        !strncasecmp("step", cmd, sizeof "step")) {
-
-      unsigned int num_of_steps = 0;
-
-      if (line[1] == ' ') {
-  sscanf(line, "%u", &num_of_steps);
-  printf("TODO:Stepping %u\n", num_of_steps);
-      }
-
-      break;
-    }
-
-    // run, run the program until a breakpoint is hit
-    else if ( !strncasecmp("quit", cmd, sizeof "quit") ||
-        !strncasecmp("q", cmd, sizeof "q")) {
-      return false;
-    }
-
-    // run, run the program until a breakpoint is hit
-    else if ( !strncasecmp("run", cmd, sizeof "run") ||
-        !strncasecmp("r", cmd, sizeof "r")) {
-      debugger->run = true;
-      debugger->debug_mode = false;
-
-      break;
-    }
-
-    // Display disassembly
-    else if ( !strncasecmp("disas", cmd, sizeof "disas") ||
-        !strncasecmp("dis", cmd, sizeof "dis") ||
-        !strncasecmp("disassemble", cmd, sizeof "disassemble")) {
-
-      uint16_t start_addr;
-      uint32_t num;
-      int res;
-
-      res = sscanf(line, "%X%u", (unsigned int *) &start_addr, &num);
-
-      if (res <= 0) {
-  start_addr = cpu->pc;
-  num = 10;
-      }
-      else if (res == 1) {
-  num = 10;
-      }
-
-      if (num > 0)
-  disassemble(emu, start_addr, num);
-
-      continue;
-    }
-
-    // Display all 16 registers
-    else if ( !strncasecmp("regs", cmd, sizeof "regs")) {
-      display_registers(emu);
-      continue;
-    }
-
-    // Display all breakpoints
-    else if ( !strncasecmp("bps", cmd, sizeof "bps" )) {
-      if (cur_bp_number > 0) {
-  int i;
-  for (i = 0;i < cur_bp_number;i++) {
-    printf("\t[%d] 0x%04X\n", i + 1, breakpoint_addresses[i]);
-  }
-      }
-      else {
-  puts("You have not set any breakpoints!\n");
-      }
-
-      continue;
-    }
-
-    else if ( !strncasecmp("dump", cmd, sizeof "dump" )) {
-      char param1[33] = {0};
-      uint16_t start_addr;
-      uint32_t stride;
-      sscanf(line, "%s", param1);
-
-      // Is it a direct address or a an address in a register being spec'd
-      if (param1[0] >= '0' && param1[0] <= '9') {
-  sscanf(param1, "%X", (unsigned int *) &start_addr);
-      }
-      else if (param1[0] == '%' || param1[0] == 'r' || param1[0] == 'R') {
-  uint16_t *p = (uint16_t *)get_reg_ptr(emu, reg_name_to_num(param1));
-  start_addr = *p;
-      }
-
-      stride = BYTE_STRIDE;
-      dump_memory(MEMSPACE, 0x0, start_addr, stride);
-    }
-
-    // Set REG/LOC VALUE
-    else if ( !strncasecmp("set", cmd, sizeof "set") ) {
-      int value = 0;
-      char reg_name_or_addr[33];
-
-      sscanf(line, "%s %X", reg_name_or_addr, &value);
-
-      if ( reg_name_to_num(reg_name_or_addr) != -1 ) {
-  uint16_t *p = (uint16_t *)get_reg_ptr(emu, reg_name_to_num(reg_name_or_addr) );
-  *p = value;
-
-  display_registers(emu);
-  disassemble(emu, cpu->pc, 1);
-      }
-      else {
-  uint16_t virtual_addr = (uint16_t) strtol(reg_name_or_addr, NULL, 0);
-
-  uint16_t *p = get_addr_ptr(virtual_addr);
-  *p = value;
-      }
-
-      continue;
-    }
-
-    // break BREAKPOINT_ADDRESS
-    else if ( !strncasecmp("break", cmd, sizeof "break") ) {
-      if (cur_bp_number >= MAX_BREAKPOINTS) {
-  printf("Too many breakpoints.\n");
-      }
-      else {
-  sscanf(line, "%X", (unsigned int *)
-         &breakpoint_addresses[cur_bp_number]);
-  printf("\n\t[Breakpoint [%d] Set]\n", cur_bp_number + 1);
-
-  ++cur_bp_number;
-      }
-
-      continue;
-    }
-
-    // help, display a list of debugger cmds
-    else if ( !strncasecmp("help", cmd, sizeof "help") ||
-        !strncasecmp("h", cmd, sizeof "h") ) {
-      display_help(emu);
-    }
-
-    // End the line loop, next instruction
-    else {
-      puts("\t[Invalid command, type \"help\".]");
-      continue;
-    }
-  }
-  */
   return true;
 }
 
@@ -505,8 +306,6 @@ void dump_memory ( Emulator *emu, uint8_t *MEM, uint32_t size, uint32_t start_ad
 
   for (i = 0; i < 32; i += 8) {
     sprintf(str, "0x%04X:\t", msp_addr);
-
-    //printf("%s", str);
     print_console(emu, str);
 
     if ( stride == BYTE_STRIDE ) {
@@ -515,7 +314,6 @@ void dump_memory ( Emulator *emu, uint8_t *MEM, uint32_t size, uint32_t start_ad
         *(MEM+0),*(MEM+1),*(MEM+2),*(MEM+3),
         *(MEM+4),*(MEM+5),*(MEM+6),*(MEM+7));
 
-      //printf("%s", str);
       print_console(emu, str);
     }
     else if ( stride == WORD_STRIDE ) {
