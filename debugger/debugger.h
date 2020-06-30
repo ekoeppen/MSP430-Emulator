@@ -27,6 +27,8 @@ typedef enum { BYTE_STRIDE, WORD_STRIDE, DWORD_STRIDE } Stride;
 
 enum { MAX_BREAKPOINTS = 100 };
 
+enum { ERROR_ILLEGAL_INSTRUCTION = 1 };
+
 typedef struct Debugger
 {
   bool disassemble_mode;
@@ -34,6 +36,7 @@ typedef struct Debugger
   bool web_interface;
   bool console_interface;
   bool quit;
+  int32_t error = 0;
 
   unsigned int ws_port;
 
@@ -46,7 +49,8 @@ typedef struct Debugger
   char mnemonic[50];
 
   uint16_t bp_addresses[MAX_BREAKPOINTS];
-  uint16_t current_bp;
+  uint16_t memory_bp_addresses[MAX_BREAKPOINTS];
+  uint16_t num_memory_bps;
   uint32_t num_bps;
 
   // debug server for web interface
@@ -62,7 +66,6 @@ void dump_memory(Emulator *emu, uint8_t *MEM, uint32_t size,
 
 void handle_sigint(int signal);
 
-bool command_loop(Emulator *emu, char *buf, int len);
 bool exec_cmd (Emulator *emu, char *buf, int len);
 
 bool handle_breakpoints (Emulator *emu);

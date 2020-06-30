@@ -25,6 +25,8 @@
 #include <stdbool.h>
 #include "../../main.h"
 
+enum { CallTracer_MaxCallDepth = 128 };
+
 /* r2 or SR, the status register */
 typedef struct Status_reg {
   uint16_t carry : 1;      // Carry flag; Set when result produces a carry
@@ -38,6 +40,25 @@ typedef struct Status_reg {
   uint16_t overflow : 1;   // Overflow flag
   uint16_t reserved : 7;   // Reserved bits
 } __attribute__((packed)) Status_reg;
+
+// Structure describing call information //
+typedef struct CallTraceEntry {
+  uint16_t targetPc; // Target call PC
+  uint16_t returnPc; // Return PC (one instruction after the call)
+  uint16_t sp;       // SP value at the time of the call
+} CallTraceEntry;
+
+// Structure containing data for call tracing //
+typedef struct CallTracer {
+  CallTraceEntry calls[CallTracer_MaxCallDepth]; // Call stack
+  uint32_t callDepth;                            // Current call stack depth
+} CallTracer;
+
+// Structure containing CPU statistics //
+typedef struct CpuStats {
+  uint16_t spLowWatermark; // The lowest recorded SP value
+  uint16_t spLastValue;    // Last SP value
+} CpuStats;
 
 // Main CPU structure //
 typedef struct Cpu {
@@ -55,11 +76,20 @@ typedef struct Cpu {
   Usci *usci;
   Bcm *bcm;
   Timer_a *timer_a;
+
+  CallTracer callTracer;
+  CpuStats stats;
 } Cpu;
 
-Status_reg get_sr_fields (Emulator *emu);
-void set_sr_from_fields(Emulator *emu, const Status_reg fields);
-void initialize_msp_registers (Emulator *emu);
-void update_register_display (Emulator *emu);
+Status_reg get_sr_fields (Emulator* const emu);
+void set_sr_from_fields(Emulator* const emu, const Status_reg fields);
+void initialize_msp_registers (Emulator* const emu);
+void update_register_display (Emulator* const emu);
+void update_cpu_stats(Emulator* const emu);
+void display_cpu_stats(Emulator* const emu);
+void reset_cpu_stats(Emulator* const emu);
+void reset_call_tracer(Emulator* const emu);
+void report_instruction_execution(Emulator* const emu, const uint16_t instruction);
+
 
 #endif

@@ -24,12 +24,12 @@ uint16_t fetch(Emulator *emu, bool report)
 {
     Cpu *cpu = emu->cpu;
     uint16_t word, *p;
-    
+
     p = (get_addr_ptr(cpu->pc));
     word = *p;
     if (emu->do_trace && report)
     {
-        char buffer[128];    
+        char buffer[128];
         sprintf(buffer, "Fetching %x - %x\n", cpu->pc, word);
         print_console(emu, buffer);
     }
@@ -69,13 +69,19 @@ void decode(Emulator *emu, uint16_t instruction, bool disassemble)
     else
     {
         char inv[100] = {0};
-
+        debugger->error = ERROR_ILLEGAL_INSTRUCTION;
         sprintf(inv, "%04X\t[INVALID INSTRUCTION]\n", instruction);
         print_console(emu, inv);
 
         //cpu->pc -= 2;
         cpu->running = false;
         debugger->debug_mode = true;
+    }
+
+    if (!disassemble)
+    {
+        report_instruction_execution(emu, instruction);
+        update_cpu_stats(emu);
     }
 }
 
