@@ -27,7 +27,7 @@ typedef enum { BYTE_STRIDE, WORD_STRIDE, DWORD_STRIDE } Stride;
 
 enum { MAX_BREAKPOINTS = 100 };
 
-enum {ERROR_ILLEGAL_INSTRUCTION = 1};
+enum { ERROR_ILLEGAL_INSTRUCTION = 1 };
 
 typedef struct Debugger
 {
@@ -50,7 +50,7 @@ typedef struct Debugger
 
   uint16_t bp_addresses[MAX_BREAKPOINTS];
   uint16_t memory_bp_addresses[MAX_BREAKPOINTS];
-  uint16_t num_memory_bps;  
+  uint16_t num_memory_bps;
   uint32_t num_bps;
 
   // debug server for web interface

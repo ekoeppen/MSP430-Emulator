@@ -24,12 +24,12 @@ uint16_t fetch(Emulator *emu, bool report)
 {
     Cpu *cpu = emu->cpu;
     uint16_t word, *p;
-    
+
     p = (get_addr_ptr(cpu->pc));
     word = *p;
     if (emu->do_trace && report)
     {
-        char buffer[128];    
+        char buffer[128];
         sprintf(buffer, "Fetching %x - %x\n", cpu->pc, word);
         print_console(emu, buffer);
     }
@@ -77,6 +77,7 @@ void decode(Emulator *emu, uint16_t instruction, bool disassemble)
         cpu->running = false;
         debugger->debug_mode = true;
     }
+
     if (!disassemble)
     {
         report_instruction_execution(emu, instruction);

@@ -261,7 +261,7 @@ static void reportCall(Emulator* const emu)
 static void reportReturn(Emulator* const emu)
 {
   char buffer[STRING_BUFFER_SIZE];
-  Cpu* const cpu = emu->cpu;
+  const Cpu* const cpu = emu->cpu;
   print_spaces(emu, cpu->callTracer.callDepth);
   sprintf(buffer, "Return from %04X to %04X; [SP] == %04X, was %04X\n",
     cpu->callTracer.calls[cpu->callTracer.callDepth].targetPc,

@@ -25,7 +25,7 @@
 #include <stdbool.h>
 #include "../../main.h"
 
-enum {CallTracer_MaxCallDepth = 128};
+enum { CallTracer_MaxCallDepth = 128 };
 
 /* r2 or SR, the status register */
 typedef struct Status_reg {
@@ -42,16 +42,16 @@ typedef struct Status_reg {
 } __attribute__((packed)) Status_reg;
 
 // Structure describing call information //
-typedef struct CallEntry {
+typedef struct CallTraceEntry {
   uint16_t targetPc; // Target call PC
   uint16_t returnPc; // Return PC (one instruction after the call)
   uint16_t sp;       // SP value at the time of the call
-} CallEntry;
+} CallTraceEntry;
 
 // Structure containing data for call tracing //
 typedef struct CallTracer {
-  CallEntry calls[CallTracer_MaxCallDepth]; // Call stack
-  uint32_t callDepth;                       // Current call stack depth
+  CallTraceEntry calls[CallTracer_MaxCallDepth]; // Call stack
+  uint32_t callDepth;                            // Current call stack depth
 } CallTracer;
 
 // Structure containing CPU statistics //
