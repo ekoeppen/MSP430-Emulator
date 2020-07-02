@@ -29,6 +29,7 @@ Major limitations:
 The following bugfixes have been implemented:
 - Pointer to SR register now points to the actual register, not a proxy (resolves issue with CLCR instruction emulated via BIC with SR as an argument)
 - Reset starts execution from the address pointed to by the reset vector instead of 0xC000 (programs compiled with TI GCC usually do not start at 0xC000)
+- Jumps longer than 512 bytes work correctly.
 
 --------------------------------------------------------------------------------------------------------------------------
 
