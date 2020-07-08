@@ -2,6 +2,14 @@
 *.out
 TAGS
 
+# Project specific files
+*.bin
+*.log
+msp430-emu
+pipe.in
+pipe.out
+*/build/*
+
 # Object files
 *.o
 *.ko
