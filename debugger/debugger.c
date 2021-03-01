@@ -48,6 +48,7 @@ bool exec_cmd (Emulator *emu, char *line, int len)
       // Reset interrupt
       uint16_t resetIntHandlerAddress = ((uint16_t*)MEMSPACE)[0xfffe / 2];
       cpu->pc = resetIntHandlerAddress;
+      printf("%04x\n", cpu->pc);
 
       reset_cpu_stats(emu);
       reset_call_tracer(emu);
@@ -339,18 +340,8 @@ void setup_debugger(Emulator *emu)
   local_emu = emu;
   Debugger *deb = emu->debugger;
 
-  switch (emu->mode)
-  {
-    case Emulator_Mode_Web:
-      deb->web_interface = true;
-      deb->console_interface = false;
-      break;
-
-    case Emulator_Mode_Cli:
-      deb->web_interface = false;
-      deb->console_interface = true;
-      break;
-  }
+  deb->web_interface = false;
+  deb->console_interface = false;
 
   deb->debug_mode = true;
   deb->disassemble_mode = false;
@@ -407,7 +398,7 @@ bool handle_breakpoints (Emulator *emu)
 
   for (i = 0;i < deb->num_memory_bps;i++) {
     if (memory_get_flags_of_virtual_address(
-        (void*)((uintptr_t)(deb->memory_bp_addresses[i]))) != 0) {
+          (void*)((uintptr_t)(deb->memory_bp_addresses[i]))) != 0) {
       sprintf(str, "\n\t[Breakpoint MEM[%d] hit]\n\n", i + 1);
       print_console(emu, str);
       handle_breakpoint_hit(emu);

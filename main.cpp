@@ -33,56 +33,27 @@ static void printHelp()
 {
     printVersion();
     printf("The following options are supported:\n");
+    printf("-m OFFSET offset in hex for the next binary to load\n");
     printf("-b NAME Load binary file\n");
     printf("-v Print program version\n");
     printf("-h Print this help\n");
-    printf("-m [web|cli] Set mode to webserver(default)/commandline\n");
-    printf("-p INTEGER Set webserver port\n");
     printf("-i NAME Set USCI input pipe/file\n");
     printf("-o NAME Set USCI output pipe/file\n");
     printf("-d NAME Set DIGITAL I/O PORT 1 output pipe/file\n");
 }
 
-static bool checkEmulatorConfig(Emulator* const emu)
-{
-    switch (emu->mode)
-    {
-        case Emulator_Mode_Web:
-            if (emu->port < 0)
-            {
-                printf("Need port argument\n");
-                return false;
-            }
-            break;
-    }
-    return true;
-}
-
-static bool parseMode(char* const modeString, Emulator_Mode* const mode)
-{
-    if (strcmp("web", modeString) == 0)
-    {
-        *mode = Emulator_Mode_Web;
-        return true;
-    } else if (strcmp("cli", modeString) == 0)
-    {
-        *mode = Emulator_Mode_Cli;
-        return true;
-    }
-    return false;
-}
-
 static bool setEmulatorConfig(Emulator* const emu, int argc, char *argv[])
 {
     int option;
+    int offset = 0xC000;
     emu->do_trace = false;
-    emu->mode = Emulator_Mode_Web;
     emu->port = -1;
     emu->binary = NULL;
     emu->usci_input_pipe_fd = 0;
     emu->usci_output_pipe_fd = 0;
     emu->usci_input_pipe_name = NULL;
     emu->usci_output_pipe_name = NULL;
+    initialize_msp_memspace();
     while ((option = getopt(argc, argv, "hvm:p:b:i:o:d:")) != -1)
     {
         switch (option)
@@ -94,14 +65,10 @@ static bool setEmulatorConfig(Emulator* const emu, int argc, char *argv[])
                 printVersion();
                 return false;
             case 'm':
-                if (!parseMode(optarg, &(emu->mode)))
-                    return false;
-                break;
-            case 'p':
-                emu->port = strtoul(optarg, NULL, 10);
+                offset = strtol(optarg, (char **)NULL, 16);
                 break;
             case 'b':
-                emu->binary = optarg;
+                load_firmware(emu, optarg, offset);
                 break;
             case 'i':
                 emu->usci_input_pipe_name = optarg;
@@ -117,31 +84,6 @@ static bool setEmulatorConfig(Emulator* const emu, int argc, char *argv[])
                 return false;
         }
     }
-    if (!checkEmulatorConfig(emu))
-    {
-        printHelp();
-        return false;
-    }
-    return true;
-}
-
-static bool startWebServer(Emulator* const emu)
-{
-    Debugger* const deb = emu->debugger;
-    deb->ws_port = emu->port;
-    pthread_t *t = &deb->web_server_thread;
-    if ( pthread_create(t, NULL, web_server, (void *)emu ) )
-    {
-        fprintf(stderr, "Error creating web server thread\n");
-        return false;
-    }
-
-    while (!deb->web_server_ready)
-        usleep(10000);
-    print_console(emu, " [MSP430 Emulator]\n Copyright (C) 2020 Rudolf Geosits (rgeosits@live.esu.edu)\n");
-    print_console(emu, " [!] Upload your firmware (ELF format only); Type 'h' for debugger options.\n\n");
-    while (!deb->web_firmware_uploaded)
-        usleep(10000);
     return true;
 }
 
@@ -153,7 +95,6 @@ static void initializeMsp430(Emulator* const emu)
     emu->cpu->p1   = (Port_1 *) calloc(1, sizeof(Port_1));
     emu->cpu->usci = (Usci *) calloc(1, sizeof(Usci));
 
-    initialize_msp_memspace();
     initialize_msp_registers(emu);
 
     setup_bcm(emu);
@@ -249,20 +190,10 @@ static void handleCommanding(Emulator* const emu)
     // Handle debugger when CPU is not running
     if (!cpu->running)
     {
-        switch (emu->mode)
-        {
-            case Emulator_Mode_Web:
-                usleep(10000);
-                break;
-            case Emulator_Mode_Cli:
-                {
-                    char* buffer = readline(NULL);
-                    const int bufferLength = strlen(buffer);
-                    exec_cmd(emu, buffer, bufferLength);
-                    free(buffer);
-                }
-                break;
-        }
+        char* buffer = readline(NULL);
+        const int bufferLength = strlen(buffer);
+        exec_cmd(emu, buffer, bufferLength);
+        free(buffer);
     }
 }
 
@@ -295,16 +226,7 @@ int mainInernal(int argc, char *argv[], Emulator* const emu)
     Cpu* const cpu = emu->cpu;
     setup_debugger(emu);
 
-    if (emu->mode == Emulator_Mode_Web)
-    {
-        if (!startWebServer(emu))
-            return -1;
-    }
-    if (emu->mode == Emulator_Mode_Cli)
-        register_signal(SIGINT); // Register Callback for CONTROL-c
-
-    if (emu->binary != NULL)
-        load_firmware(emu, emu->binary, 0xC000);
+    register_signal(SIGINT); // Register Callback for CONTROL-c
 
     if (!openUsciPipes(emu))
     {
@@ -340,11 +262,9 @@ int main(int argc, char *argv[])
 {
     Emulator *emu = (Emulator *) calloc( 1, sizeof(Emulator) );
     emu->debugger  = (Debugger *) calloc(1, sizeof(Debugger));
-    emu->debugger->server = (Server *) calloc(1, sizeof(Server));
 
     const int result = mainInernal(argc, argv, emu);
 
-    free(emu->debugger->server);
     free(emu->debugger);
     free(emu);
     return result;

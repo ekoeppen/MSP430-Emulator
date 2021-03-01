@@ -17,7 +17,6 @@
 */
 
 #include "io.h"
-#include "websockets/packet_queue.h"
 
 #define BIT_COUNT 8
 
@@ -35,17 +34,7 @@ static void digitalIoToString(char output[BIT_COUNT + 1], const uint8_t mask, co
 
 void print_serial (Emulator *emu, char *buf)
 {
-    switch (emu->mode)
-    {
-        case Emulator_Mode_Web:
-            packet_enqueue(emu, buf, strlen(buf) + 1, SERIAL_PACKET_OPCODE);
-            break;
-        case Emulator_Mode_Cli:
-            // This is just for fallback or compatibility, if another UART like peripheral
-            // was implemented independently
-            printf("Serial %s\n", buf);
-            break;
-    }
+    printf("Serial %s\n", buf);
 }
 
 void put_port1(Emulator* const emu, const uint8_t mask, const uint8_t x)
@@ -96,13 +85,5 @@ bool get_serial(Emulator* const emu, uint8_t* const x)
 
 void print_console (Emulator *emu, const char *buf)
 {
-    switch (emu->mode)
-    {
-    case Emulator_Mode_Web:
-        packet_enqueue(emu, (void*)buf, strlen(buf) + 1, CONSOLE_PACKET_OPCODE);
-        break;
-    case Emulator_Mode_Cli:
-        printf("%s", buf);
-        break;
-    }
+    printf("%s", buf);
 }

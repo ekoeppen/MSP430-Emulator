@@ -29,18 +29,13 @@
 #include <string.h>
 #include <stdint.h>
 #include <signal.h>
+#include <getopt.h>
 #include <sys/wait.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include <libwebsockets.h>
 #include <readline/readline.h>
 #include <readline/history.h>
-
-typedef enum {
-  Emulator_Mode_Web,
-  Emulator_Mode_Cli
-} Emulator_Mode;
 
 typedef struct Emulator Emulator;
 
@@ -52,7 +47,6 @@ typedef struct Timer_a Timer_a;
 typedef struct Status_reg Status_reg;
 
 typedef struct Debugger Debugger;
-typedef struct Server Server;
 typedef struct Packet Packet;
 
 #include "devices/peripherals/bcm.h"
@@ -62,7 +56,6 @@ typedef struct Packet Packet;
 #include "devices/cpu/registers.h"
 #include "devices/utilities.h"
 #include "devices/memory/memspace.h"
-#include "debugger/websockets/emu_server.h"
 #include "devices/cpu/decoder.h"
 #include "debugger/debugger.h"
 #include "debugger/register_display.h"
@@ -72,7 +65,6 @@ struct Emulator
 {
     Cpu *cpu;
     Debugger *debugger;
-    Emulator_Mode mode;
     char* binary;
     int port;
     char* usci_input_pipe_name;

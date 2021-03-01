@@ -1,7 +1,7 @@
 #-----------------#
 # MSP430 Emulator #
 #-----------------#
-FROM ubuntu:19.10
+FROM ubuntu:20.04
 
 # Meta
 LABEL PROJECT_NAME="MSP430 Emulator"

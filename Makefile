@@ -1,7 +1,6 @@
 CXX=g++
-CXXFLAGS=-g
-LDLIBS=-lreadline -lwebsockets -lpthread -lrt -lssl -lcrypto
-SERVER=server
+CXXFLAGS=-g -std=c++11
+LDLIBS=-lreadline -lpthread
 EMULATOR=msp430-emu
 
 .PHONY: all test clean
@@ -10,9 +9,9 @@ all: ${EMULATOR} ${SERVER}
 
 # Main emulator program
 
-${EMULATOR} : main.o emu_server.o utilities.o registers.o memspace.o debugger.o disassembler.o \
+${EMULATOR} : main.o utilities.o registers.o memspace.o debugger.o disassembler.o \
 	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o usci.o port1.o bcm.o \
-	timer_a.o packet_queue.o io.o
+	timer_a.o io.o
 	${CXX} ${CXXFLAGS} -o $@ $^ ${LDLIBS}
 
 main.o : main.cpp main.h
@@ -66,28 +65,13 @@ port1.o : devices/peripherals/port1.c devices/peripherals/port1.h
 io.o: debugger/io.c debugger/io.h
 	${CXX} ${CXXFLAGS} -c $<
 
-emu_server.o : debugger/websockets/emu_server.cpp debugger/websockets/emu_server.h
-	${CXX} ${CXXFLAGS} -c $<
-
-packet_queue.o : debugger/websockets/packet_queue.c debugger/websockets/packet_queue.h
-	${CXX} ${CXXFLAGS} -c $<
-
-# Server Program
-
-${SERVER} : server.o
-	${CXX} ${CXXFLAGS} -o $@ $^ ${LDLIBS}
-
-server.o : debugger/server/server.c debugger/server/server.h
-	${CXX} ${CXXFLAGS} -c $<
-
-
 clean :
 	rm -f server.o main.o utilities.o emu_server.o registers.o \
 		memspace.o debugger.o disassembler.o \
 		register_display.o decoder.o flag_handler.o formatI.o \
 		formatII.o formatIII.o io.o \
 		usci.o port1.o packet_queue.o bcm.o timer_a.o \
-		${EMULATOR} ${SERVER}
+		${EMULATOR}
 	${MAKE} -C test clean
 
 test : ${EMULATOR} test/Makefile

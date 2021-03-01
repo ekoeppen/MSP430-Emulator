@@ -53,8 +53,6 @@ typedef struct Debugger
   uint16_t num_memory_bps;
   uint32_t num_bps;
 
-  // debug server for web interface
-  Server *server;
 } Debugger;
 
 void register_signal(int sig);
