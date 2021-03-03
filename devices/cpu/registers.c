@@ -25,11 +25,13 @@
 //##########+++ MSP430 Register initialization +++##########
 void initialize_msp_registers(Emulator* const emu)
 {
+  extern uint8_t* MEMSPACE;
   Cpu *cpu = emu->cpu;
   Debugger *debugger = emu->debugger;
 
   /* Initialize Program Counter to *0xFFFE at boot or reset (WARM)*/
-  cpu->pc = 0xc000;
+  uint16_t resetIntHandlerAddress = ((uint16_t*)MEMSPACE)[0xfffe / 2];
+  cpu->pc = resetIntHandlerAddress;
 
   /* Stack pointer - set to the end of the address space, should be set by
      the program */
