@@ -66,6 +66,34 @@ void decode(Emulator *emu, uint16_t instruction, bool disassemble)
         // format I (two operand) instruction
         decode_formatI(emu, instruction, disassemble);
     }
+    else if (instruction < 0x0006)
+    {
+        switch (instruction) {
+            case 0x0000:
+                exit(cpu->r7);
+                break;
+            case 0x0001:
+                write(1, &cpu->r7, 1);
+                break;
+            case 0x0002:
+                {
+                    char c;
+                    read(0, &c, 1);
+                    cpu->r7 = c;
+                } break;
+            case 0x0003:
+                emu->do_trace = true;
+                break;
+            case 0x0004:
+                emu->do_trace = false;
+                break;
+            case 0x0005:
+                display_registers(emu);
+                break;
+            default:
+                break;
+        }
+    }
     else
     {
         char inv[100] = {0};
