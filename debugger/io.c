@@ -34,7 +34,7 @@ static void digitalIoToString(char output[BIT_COUNT + 1], const uint8_t mask, co
 
 void print_serial (Emulator *emu, char *buf)
 {
-    printf("Serial %s\n", buf);
+    puts(buf);
 }
 
 void put_port1(Emulator* const emu, const uint8_t mask, const uint8_t x)
@@ -61,10 +61,7 @@ void put_serial(Emulator* const emu, const uint8_t x)
 {
     if (emu->usci_output_pipe == NULL)
     {
-        char str[2];
-        str[0] = (char)x;
-        str[1] = 0;
-        print_serial(emu, str);
+        write(1, &x, 1);
     }
     else
     {
@@ -77,8 +74,10 @@ void put_serial(Emulator* const emu, const uint8_t x)
 
 bool get_serial(Emulator* const emu, uint8_t* const x)
 {
-    if (emu->usci_input_pipe == NULL)
-        return false;
+    if (emu->usci_input_pipe == NULL) {
+        read(0, x, 1);
+        return 1;
+    }
     const ssize_t count = read(emu->usci_input_pipe_fd, x, sizeof(uint8_t));
     return count > 0;
 }
