@@ -37,6 +37,7 @@ static void printHelp()
     printf("-b NAME Load binary file\n");
     printf("-v Print program version\n");
     printf("-h Print this help\n");
+    printf("-r Run after loading\n");
     printf("-i NAME Set USCI input pipe/file\n");
     printf("-o NAME Set USCI output pipe/file\n");
     printf("-d NAME Set DIGITAL I/O PORT 1 output pipe/file\n");
@@ -54,7 +55,7 @@ static bool setEmulatorConfig(Emulator* const emu, int argc, char *argv[])
     emu->usci_input_pipe_name = NULL;
     emu->usci_output_pipe_name = NULL;
     initialize_msp_memspace();
-    while ((option = getopt(argc, argv, "hvm:p:b:i:o:d:")) != -1)
+    while ((option = getopt(argc, argv, "hvrm:b:i:o:d:")) != -1)
     {
         switch (option)
         {
@@ -78,6 +79,9 @@ static bool setEmulatorConfig(Emulator* const emu, int argc, char *argv[])
                 break;
             case 'd':
                 emu->port1_output_pipe_name = optarg;
+                break;
+            case 'r':
+                emu->start_running = true;
                 break;
             default:
                 printf("Unknown option\n");
@@ -240,10 +244,13 @@ int mainInernal(int argc, char *argv[], Emulator* const emu)
         return -1;
     }
 
-    // display first round of registers
-    display_registers(emu);
-    disassemble(emu, cpu->pc, 1);
-    update_register_display(emu);
+    cpu->running = emu->start_running;
+    if (!cpu->running) {
+        // display first round of registers
+        display_registers(emu);
+        disassemble(emu, cpu->pc, 1);
+        update_register_display(emu);
+    }
 
     // Fetch-Decode-Execute Cycle (run machine)
     while (!deb->quit)

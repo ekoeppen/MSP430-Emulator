@@ -77,4 +77,5 @@ struct Emulator
     FILE* port1_output_pipe;
     int port1_output_pipe_fd;
     bool do_trace;
+    bool start_running;
 };
