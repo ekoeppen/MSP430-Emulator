@@ -84,7 +84,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       source_value = immediate_constant;
 
       sprintf(asm_operands, "#0x%04hX, %s",
-	      (uint16_t) source_value, d_reg_name);
+              (uint16_t) source_value, d_reg_name);
     }
     else {                             /* Source register */
       source_value = *s_reg;
@@ -133,7 +133,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
     }
     else {                             /* Destination Indexed */
       sprintf(asm_op2, "0x%04hX(%s)",
-	      (uint16_t) destination_offset, d_reg_name);
+              (uint16_t) destination_offset, d_reg_name);
     }
 
     strncat(asm_operands, asm_op2, sizeof asm_op2);
@@ -168,7 +168,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       strncat(hex_str, hex_str_part, sizeof hex_str);
 
       sprintf(asm_operands, "&0x%04hX, %s",
-	      (uint16_t) source_offset, d_reg_name);
+              (uint16_t) source_offset, d_reg_name);
     }
     else {                             /* Source Indexed */
       source_offset = fetch(emu, false);
@@ -178,7 +178,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       strncat(hex_str, hex_str_part, sizeof hex_str);
 
       sprintf(asm_operands, "0x%04hX(%s), %s",
-	      (uint16_t) source_offset, s_reg_name, d_reg_name);
+              (uint16_t) source_offset, s_reg_name, d_reg_name);
     }
 
     destination_addr = (uint16_t *)d_reg;          /* Destination register */
@@ -233,7 +233,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       strncat(hex_str, hex_str_part, sizeof hex_str);
 
       sprintf(asm_operands, "0x%04X(%s), ",
-	      (uint16_t) source_offset, s_reg_name);
+              (uint16_t) source_offset, s_reg_name);
     }
 
     destination_offset = fetch(emu, false);
@@ -324,7 +324,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
     if (constant_generator_active) {   /* Source Constant */
       source_value = immediate_constant;
       sprintf(asm_operands, "#0x%04X, %s",
-	      (uint16_t) source_value, d_reg_name);
+              (uint16_t) source_value, d_reg_name);
     }
     else if (source == 0) {            /* Source Immediate */
       source_value = fetch(emu, false);
@@ -333,12 +333,12 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       strncat(hex_str, hex_str_part, sizeof hex_str);
 
       if (bw_flag == WORD) {
-	      sprintf(asm_operands, "#0x%04X, %s",
-	      	(uint16_t) source_value, d_reg_name);
+              sprintf(asm_operands, "#0x%04X, %s",
+                (uint16_t) source_value, d_reg_name);
       }
       else if (bw_flag == BYTE) {
-	      sprintf(asm_operands, "#0x%04X, %s",
-		      (uint8_t) source_value, d_reg_name);
+              sprintf(asm_operands, "#0x%04X, %s",
+                      (uint8_t) source_value, d_reg_name);
       }
     }
     else {                              /* Source Indirect AutoIncrement */
@@ -347,7 +347,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       sprintf(asm_operands, "@%s+, %s", s_reg_name, d_reg_name);
 
       if (!disassemble) {
-	      bw_flag == WORD ? *s_reg += 2 : (*s_reg += 1);
+              bw_flag == WORD ? *s_reg += 2 : (*s_reg += 1);
       }
     }
 
@@ -386,7 +386,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       sprintf(asm_operands, "@%s+, ", s_reg_name);
 
       if (!disassemble) {
-	      bw_flag == WORD ? *s_reg += 2 : (*s_reg += 1);
+              bw_flag == WORD ? *s_reg += 2 : (*s_reg += 1);
       }
     }
 
@@ -409,7 +409,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       destination_addr = get_addr_ptr(*d_reg + destination_offset);
 
       sprintf(asm_op2, "0x%04X(%s)",
-	      (uint16_t) destination_offset, d_reg_name);
+              (uint16_t) destination_offset, d_reg_name);
     }
 
     strncat(asm_operands, asm_op2, sizeof asm_op2);
@@ -477,7 +477,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
         fields.negative = is_negative((int16_t*)destination_addr, bw_flag);
         fields.carry = is_carried(original_dst_value, source_value, bw_flag);
         fields.overflow = is_overflowed(source_value, original_dst_value,
-          			  destination_addr, bw_flag);
+                                  destination_addr, bw_flag);
         set_sr_from_fields(emu, fields);
 
         break;
@@ -514,7 +514,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
         fields.negative = is_negative((int16_t*)destination_addr, bw_flag);
         fields.carry = is_carried(original_dst_value, source_value, bw_flag);
         fields.overflow = is_overflowed(source_value, original_dst_value,
-          			  destination_addr, bw_flag);
+                                  destination_addr, bw_flag);
         set_sr_from_fields(emu, fields);
         break;
       }
@@ -553,7 +553,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
         fields.negative = is_negative((int16_t*)destination_addr, bw_flag);
         fields.carry = is_carried(original_dst_value, source_value, bw_flag);
         fields.overflow = is_overflowed(source_value, original_dst_value,
-          			  destination_addr, bw_flag);
+                                  destination_addr, bw_flag);
         set_sr_from_fields(emu, fields);
         break;
       }
@@ -598,7 +598,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
         }
 
         fields.overflow = is_overflowed(source_value, original_dst_value,
-          			  destination_addr, bw_flag);
+                                  destination_addr, bw_flag);
         set_sr_from_fields(emu, fields);
         break;
       }
@@ -815,7 +815,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
   else {
     switch (opcode) {
       case 0x4: {
-	      bw_flag == WORD ?
+              bw_flag == WORD ?
           strncpy(mnemonic, "MOV", sizeof mnemonic) :
           strncpy(mnemonic, "MOV.B", sizeof mnemonic);
 
@@ -857,7 +857,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
         break;
       }
       case 0xA: {
-	      bw_flag == WORD ?
+              bw_flag == WORD ?
           strncpy(mnemonic, "DADD", sizeof mnemonic) :
           strncpy(mnemonic, "DADD.B", sizeof mnemonic);
 
@@ -914,20 +914,20 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
 
       // Make little endian big endian
       for (i = 0;i < strlen(hex_str);i += 4) {
-      	one = hex_str[i];
-      	two = hex_str[i + 1];
+        one = hex_str[i];
+        two = hex_str[i + 1];
 
-      	hex_str[i] = hex_str[i + 2];
-      	hex_str[i + 1] = hex_str[i + 3];
+        hex_str[i] = hex_str[i + 2];
+        hex_str[i + 1] = hex_str[i + 3];
 
-      	hex_str[i + 2] = one;
-      	hex_str[i + 3] = two;
+        hex_str[i + 2] = one;
+        hex_str[i + 3] = two;
       }
 
       print_console(emu, hex_str);
 
       for (i = strlen(hex_str);i < 12;i++) {
-      	print_console(emu, " ");
+        print_console(emu, " ");
       }
 
       print_console(emu, "\t");

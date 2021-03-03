@@ -98,17 +98,17 @@ int16_t run_constant_generator(uint8_t source, uint8_t as_flag)
             {
                 case 0b10:
                 {     /* +4, bit processing */
-	                generated_constant = 4;
-	                break;
+                    generated_constant = 4;
+                    break;
                 }
                 case 0b11:
                 {     /* +8, bit processing */
-	                generated_constant = 8;
-	                break;
-	            }
+                    generated_constant = 8;
+                    break;
+                }
                 default:
                 {
-	                printf("Invalid as_flag for CG1\n");
+                    printf("Invalid as_flag for CG1\n");
                 }
             }
 
@@ -123,27 +123,27 @@ int16_t run_constant_generator(uint8_t source, uint8_t as_flag)
             {
                 case 0b00:
                 {     /* 0, word processing */
-	                generated_constant = 0;
-	                break;
+                    generated_constant = 0;
+                    break;
                 }
                 case 0b01:
                 {     /* +1 */
-	                generated_constant = 1;
-	                break;
+                    generated_constant = 1;
+                    break;
                 }
                 case 0b10:
                 {     /* +2, bit processing */
-	                generated_constant = 2;
-	                break;
+                    generated_constant = 2;
+                    break;
                 }
                 case 0b11:
                 {     /* -1, word processing */
-	                generated_constant = -1;
-	                break;
+                    generated_constant = -1;
+                    break;
                 }
                 default:
                 {
-	                printf("Invalid as_flag for CG2\n");
+                    printf("Invalid as_flag for CG2\n");
                 }
             }
 
