@@ -108,7 +108,6 @@ void decode(Emulator *emu, uint16_t instruction, bool disassemble)
 
     if (!disassemble)
     {
-        report_instruction_execution(emu, instruction);
         update_cpu_stats(emu);
     }
 }
