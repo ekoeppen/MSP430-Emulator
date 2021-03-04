@@ -78,6 +78,3 @@ clean :
 install : ${EMULATOR}
 	install -d ${PREFIX}/bin
 	install $< ${PREFIX}/bin
-
-test : ${EMULATOR} test/Makefile
-	${MAKE} -C test test
