@@ -45,6 +45,7 @@ void display_registers(Emulator *emu)
   char *v_flag, *n_flag, *z_flag, *c_flag;
   char *red, *green, *cyan, *clear, *blue, *white, *yellow;
   char *reg_col, *spec_reg_col, *decor_col, *value_col;
+  char *sreg_col, *flag_col;
 
   const char *r0_name = "PC";
   const char *r1_name = "SP";
@@ -72,10 +73,12 @@ void display_registers(Emulator *emu)
   yellow = (char*)"\x1b[33;1m";
   clear = (char*)"";
 
-  reg_col = blue;
-  value_col = white;
-  spec_reg_col = red;
-  decor_col = green;
+  reg_col = "";
+  value_col = "";
+  spec_reg_col = "";
+  decor_col = "";
+  sreg_col = "";
+  flag_col = "";
 
   v_flag = (char*)"V\x1b[0m";
   n_flag = (char*)"\x1b[36;1mN\x1b[0m";
@@ -85,54 +88,54 @@ void display_registers(Emulator *emu)
   const Status_reg flags = get_sr_fields(emu);
 
   sprintf(full,
-	  "\n%s%s%s:   %s%04X  "\
-	  "%s%s%s:   %s%04X  "	\
-	  "%s%s%s:   %s%04X  "\
-	  "%s%s%s:  %s%04X  "\
-	  "%s%s%s: %s%d\n"\
-	  "%s%%%s%s%s:  %s%04X  "\
-	  "%s%%%s%s%s:  %s%04X  "\
-	  "%s%%%s%s%s:  %s%04X  "\
-	  "%s%%%s%s%s:  %s%04X  "\
-	  "%s%s%s: %s%d\n"\
-	  "%s%%%s%s%s:  %s%04X  "\
-	  "%s%%%s%s%s:  %s%04X  "\
-	  "%s%%%s%s%s: %s%04X  "\
-	  "%s%%%s%s%s: %s%04X  "\
-	  "%s%s%s: %s%d\n"\
-	  "%s%%%s%s%s: %s%04X  "\
-	  "%s%%%s%s%s: %s%04X  "\
-	  "%s%%%s%s%s: %s%04X  "\
-	  "%s%%%s%s%s: %s%04X  "\
-	  "%s%s%s: %s%d\n\n",
+      "\n%s%s%s:   %s%04X  "\
+      "%s%s%s:   %s%04X  "  \
+      "%s%s%s:   %s%04X  "\
+      "%s%s%s:  %s%04X  "\
+      "%s%s%s: %s%d\n"\
+      "%s%%%s%s%s:  %s%04X  "\
+      "%s%%%s%s%s:  %s%04X  "\
+      "%s%%%s%s%s:  %s%04X  "\
+      "%s%%%s%s%s:  %s%04X  "\
+      "%s%s%s: %s%d\n"\
+      "%s%%%s%s%s:  %s%04X  "\
+      "%s%%%s%s%s:  %s%04X  "\
+      "%s%%%s%s%s: %s%04X  "\
+      "%s%%%s%s%s: %s%04X  "\
+      "%s%s%s: %s%d\n"\
+      "%s%%%s%s%s: %s%04X  "\
+      "%s%%%s%s%s: %s%04X  "\
+      "%s%%%s%s%s: %s%04X  "\
+      "%s%%%s%s%s: %s%04X  "\
+      "%s%s%s: %s%d\n\n",
 
-	  red, r0_name, decor_col, value_col, (uint16_t)cpu->pc,
-	  red, r1_name, decor_col, value_col, (uint16_t)cpu->sp,
-	  red, r2_name, decor_col, value_col, (uint16_t)r2,
-	  red, r3_name, decor_col, value_col, (uint16_t)cpu->cg2,
+      sreg_col, r0_name, decor_col, value_col, (uint16_t)cpu->pc,
+      sreg_col, r1_name, decor_col, value_col, (uint16_t)cpu->sp,
+      sreg_col, r2_name, decor_col, value_col, (uint16_t)r2,
+      sreg_col, r3_name, decor_col, value_col, (uint16_t)cpu->cg2,
 
-	  cyan, c_flag, decor_col, value_col, flags.carry,
+      flag_col, c_flag, decor_col, value_col, flags.carry,
 
-	  decor_col, reg_col, r4_name, decor_col, value_col, (uint16_t)cpu->r4,
-	  decor_col, reg_col, r5_name, decor_col, value_col, (uint16_t)cpu->r5,
-	  decor_col, reg_col, r6_name, decor_col, value_col, (uint16_t)cpu->r6,
-	  decor_col, reg_col, r7_name, decor_col, value_col, (uint16_t)cpu->r7,
+      decor_col, reg_col, r4_name, decor_col, value_col, (uint16_t)cpu->r4,
+      decor_col, reg_col, r5_name, decor_col, value_col, (uint16_t)cpu->r5,
+      decor_col, reg_col, r6_name, decor_col, value_col, (uint16_t)cpu->r6,
+      decor_col, reg_col, r7_name, decor_col, value_col, (uint16_t)cpu->r7,
 
-	  cyan, z_flag, decor_col, value_col, flags.zero,
+      flag_col, z_flag, decor_col, value_col, flags.zero,
 
-	  decor_col, reg_col, r8_name, decor_col,value_col, (uint16_t)cpu->r8,
-	  decor_col, reg_col, r9_name, decor_col,value_col, (uint16_t)cpu->r9,
-	  decor_col, reg_col, r10_name, decor_col,value_col,(uint16_t)cpu->r10,
-	  decor_col, reg_col, r11_name, decor_col,value_col,(uint16_t)cpu->r11,
+      decor_col, reg_col, r8_name, decor_col,value_col, (uint16_t)cpu->r8,
+      decor_col, reg_col, r9_name, decor_col,value_col, (uint16_t)cpu->r9,
+      decor_col, reg_col, r10_name, decor_col,value_col,(uint16_t)cpu->r10,
+      decor_col, reg_col, r11_name, decor_col,value_col,(uint16_t)cpu->r11,
 
-	  cyan, n_flag, decor_col, value_col, flags.negative,
+      flag_col, n_flag, decor_col, value_col, flags.negative,
 
-	  decor_col, reg_col, r12_name, decor_col,value_col,(uint16_t)cpu->r12,
-	  decor_col, reg_col, r13_name, decor_col,value_col,(uint16_t)cpu->r13,
-	  decor_col, reg_col, r14_name, decor_col,value_col,(uint16_t)cpu->r14,
-	  decor_col, reg_col, r15_name, decor_col,value_col,(uint16_t)cpu->r15,
+      decor_col, reg_col, r12_name, decor_col,value_col,(uint16_t)cpu->r12,
+      decor_col, reg_col, r13_name, decor_col,value_col,(uint16_t)cpu->r13,
+      decor_col, reg_col, r14_name, decor_col,value_col,(uint16_t)cpu->r14,
+      decor_col, reg_col, r15_name, decor_col,value_col,(uint16_t)cpu->r15,
 
-	  cyan, v_flag, decor_col, value_col, flags.overflow);
+      flag_col, v_flag, decor_col, value_col, flags.overflow);
 
   print_console(emu, full);
 }
