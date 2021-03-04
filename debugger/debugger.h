@@ -33,18 +33,8 @@ typedef struct Debugger
 {
   bool disassemble_mode;
   bool debug_mode;
-  bool web_interface;
-  bool console_interface;
   bool quit;
-  int32_t error = 0;
-
-  unsigned int ws_port;
-
-  pthread_t web_server_thread;
-  bool web_server_ready;
-  bool web_firmware_uploaded;
-
-  pthread_t gui_thread;
+  int32_t error;
 
   char mnemonic[50];
 

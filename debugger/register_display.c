@@ -64,44 +64,23 @@ void display_registers(Emulator *emu)
   const char *r15_name = "R15";
 
 
-  if (debugger->console_interface) {
-    red = (char*)"\x1b[31;1m";
-    green = (char*)"\x1b[32;1m";
-    cyan = (char*)"\x1b[36;1m";
-    blue = (char*)"\x1b[34;1m";
-    white = (char*)"\x1b[37;1m";
-    yellow = (char*)"\x1b[33;1m";
-    clear = (char*)"";
+  red = (char*)"\x1b[31;1m";
+  green = (char*)"\x1b[32;1m";
+  cyan = (char*)"\x1b[36;1m";
+  blue = (char*)"\x1b[34;1m";
+  white = (char*)"\x1b[37;1m";
+  yellow = (char*)"\x1b[33;1m";
+  clear = (char*)"";
 
-    reg_col = blue;
-    value_col = white;
-    spec_reg_col = red;
-    decor_col = green;
+  reg_col = blue;
+  value_col = white;
+  spec_reg_col = red;
+  decor_col = green;
 
-    v_flag = (char*)"V\x1b[0m";
-    n_flag = (char*)"\x1b[36;1mN\x1b[0m";
-    z_flag = (char*)"\x1b[36;1mZ\x1b[0m";
-    c_flag = (char*)"\x1b[36;1mC\x1b[0m";
-  }
-  else {
-    red = (char*)"";
-    green = (char*)"";
-    cyan = (char*)"";
-    blue = (char*)"";
-    white = (char*)"";
-    yellow = (char*)"";
-    clear = (char*)"";
-
-    reg_col = (char*)"";
-    value_col = (char*)"";
-    spec_reg_col = (char*)"";
-    decor_col = (char*)"";
-
-    v_flag = (char*)"V";
-    n_flag = (char*)"N";
-    z_flag = (char*)"Z";
-    c_flag = (char*)"C";
-  }
+  v_flag = (char*)"V\x1b[0m";
+  n_flag = (char*)"\x1b[36;1mN\x1b[0m";
+  z_flag = (char*)"\x1b[36;1mZ\x1b[0m";
+  c_flag = (char*)"\x1b[36;1mC\x1b[0m";
 
   const Status_reg flags = get_sr_fields(emu);
 

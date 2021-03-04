@@ -336,34 +336,8 @@ const char* LocalHelpStr =
 "* quit\t\t\t[Exit program]\n"\
 "**************************************************\n";
 
-const char* WebHelpStr =
-"--------------------------------------------------\n"\
-" \t\t[MSP430-Emulator]\n"\
-" run\t\t\t[Run Program Until Breakpoint is Hit]\n"\
-" step [N]\t\t[Step Into Instruction]\n"\
-" dump [HEX_ADDR|Rn]\t[Dump Memory direct or at register value]\n"\
-" set [HEX_ADDR|Rn]\t[Set Memory or Register Location]\n"\
-" dis [N][HEX_ADDR]\t[Disassemble Instructions]\n"\
-" break ADDR\t\t[Set a PC Breakpoint]\n"\
-" memorybreak ADDR\t\t[Set a Memory Breakpoint]\n"\
-" bps\t\t\t[Display Breakpoints]\n"\
-" regs\t\t\t[Display Registers]\n"\
-" reset\t\t\t[Reset Machine]\n"\
-" stats\t\t\t[Display CPU Statistics]\n"\
-" trace [ON|OFF]\t\t[Enable/disable instruction trace]\n"\
-" quit\t\t\t[Exit program]\n"\
-"--------------------------------------------------\n";
-
 void display_help(Emulator *emu)
 {
     Debugger *deb = emu->debugger;
-
-    if (deb->web_interface)
-    {
-        print_console(emu, WebHelpStr);
-    }
-    else
-    {
-        puts(LocalHelpStr);
-    }
+    print_console(emu, LocalHelpStr);
 }

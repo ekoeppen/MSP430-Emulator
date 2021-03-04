@@ -22,6 +22,7 @@
 #define VERSION_STRING "1.0.0"
 #define PROGRAM_NAME "MSP430 Emulator"
 
+#include <unistd.h>
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
