@@ -2,6 +2,7 @@ CXX=g++
 CXXFLAGS=-g -std=c++11
 LDLIBS=-lreadline -lpthread
 EMULATOR=msp430-emu
+PREFIX=/usr/local
 
 .PHONY: all test clean
 
@@ -73,6 +74,10 @@ clean :
 		usci.o port1.o packet_queue.o bcm.o timer_a.o \
 		${EMULATOR}
 	${MAKE} -C test clean
+
+install : ${EMULATOR}
+	install -d ${PREFIX}/bin
+	install $< ${PREFIX}/bin
 
 test : ${EMULATOR} test/Makefile
 	${MAKE} -C test test
