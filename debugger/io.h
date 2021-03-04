@@ -24,9 +24,4 @@
 void print_console (Emulator *emu, const char *buf);
 void print_serial (Emulator *emu, char *buf);
 
-void put_serial(Emulator* const emu, const uint8_t x);
-bool get_serial(Emulator* const emu, uint8_t* const x);
-
-void put_port1(Emulator* const emu, const uint8_t mask, const uint8_t x);
-
 #endif

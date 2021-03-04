@@ -38,9 +38,6 @@ static void printHelp()
     printf("-v Print program version\n");
     printf("-h Print this help\n");
     printf("-r Run after loading\n");
-    printf("-i NAME Set USCI input pipe/file\n");
-    printf("-o NAME Set USCI output pipe/file\n");
-    printf("-d NAME Set DIGITAL I/O PORT 1 output pipe/file\n");
 }
 
 static bool setEmulatorConfig(Emulator* const emu, int argc, char *argv[])
@@ -48,14 +45,9 @@ static bool setEmulatorConfig(Emulator* const emu, int argc, char *argv[])
     int option;
     int offset = 0xC000;
     emu->do_trace = false;
-    emu->port = -1;
     emu->binary = NULL;
-    emu->usci_input_pipe_fd = 0;
-    emu->usci_output_pipe_fd = 0;
-    emu->usci_input_pipe_name = NULL;
-    emu->usci_output_pipe_name = NULL;
     initialize_msp_memspace();
-    while ((option = getopt(argc, argv, "hvrm:b:i:o:d:")) != -1)
+    while ((option = getopt(argc, argv, "hvrm:b:")) != -1)
     {
         switch (option)
         {
@@ -71,15 +63,6 @@ static bool setEmulatorConfig(Emulator* const emu, int argc, char *argv[])
             case 'b':
                 load_firmware(emu, optarg, offset);
                 break;
-            case 'i':
-                emu->usci_input_pipe_name = optarg;
-                break;
-            case 'o':
-                emu->usci_output_pipe_name = optarg;
-                break;
-            case 'd':
-                emu->port1_output_pipe_name = optarg;
-                break;
             case 'r':
                 emu->start_running = true;
                 break;
@@ -94,98 +77,14 @@ static bool setEmulatorConfig(Emulator* const emu, int argc, char *argv[])
 static void initializeMsp430(Emulator* const emu)
 {
     emu->cpu       = (Cpu *) calloc(1, sizeof(Cpu));
-    emu->cpu->bcm  = (Bcm *) calloc(1, sizeof(Bcm));
-    emu->cpu->timer_a  = (Timer_a *) calloc(1, sizeof(Timer_a));
-    emu->cpu->p1   = (Port_1 *) calloc(1, sizeof(Port_1));
-    emu->cpu->usci = (Usci *) calloc(1, sizeof(Usci));
-
     initialize_msp_registers(emu);
-
-    setup_bcm(emu);
-    setup_timer_a(emu);
-    setup_port_1(emu);
-    setup_usci(emu);
 }
 
 static void deinitializeMsp430(Emulator* const emu)
 {
     uninitialize_msp_memspace();
     Cpu* const cpu = emu->cpu;
-    free(cpu->timer_a);
-    free(cpu->bcm);
-    free(cpu->p1);
-    free(cpu->usci);
     free(cpu);
-}
-
-static bool openUsciPipes(Emulator* const emu)
-{
-    if (emu->usci_input_pipe_name != NULL)
-    {
-        emu->usci_input_pipe = fopen(emu->usci_input_pipe_name, "rb");
-        if (emu->usci_input_pipe == NULL)
-        {
-            print_console(emu, "Cannot open USCI input pipe\n");
-            return false;
-        }
-        emu->usci_input_pipe_fd = fileno(emu->usci_input_pipe);
-        int flags = fcntl(emu->usci_input_pipe_fd, F_GETFL, 0);
-        fcntl(emu->usci_input_pipe_fd, F_SETFL, flags | O_NONBLOCK);
-    }
-    if (emu->usci_output_pipe_name != NULL)
-    {
-        emu->usci_output_pipe = fopen(emu->usci_output_pipe_name, "wb");
-        if (emu->usci_output_pipe == NULL)
-        {
-            print_console(emu, "Cannot open USCI output pipe\n");
-            return false;
-        }
-        emu->usci_output_pipe_fd = fileno(emu->usci_output_pipe);
-    }
-    return true;
-}
-
-static bool closeUsciPipes(Emulator* const emu)
-{
-    if (emu->usci_input_pipe != NULL)
-    {
-        fclose(emu->usci_input_pipe);
-        emu->usci_input_pipe = NULL;
-        emu->usci_input_pipe_fd = -1;
-    }
-    if (emu->usci_output_pipe != NULL)
-    {
-        fclose(emu->usci_output_pipe);
-        emu->usci_output_pipe = NULL;
-        emu->usci_output_pipe_fd = -1;
-    }
-    return true;
-}
-
-static bool openDioPipes(Emulator* const emu)
-{
-    if (emu->port1_output_pipe_name != NULL)
-    {
-        emu->port1_output_pipe = fopen(emu->port1_output_pipe_name, "wb");
-        if (emu->port1_output_pipe == NULL)
-        {
-            print_console(emu, "Cannot open DIGITAL I.O PORT 1 output pipe\n");
-            return false;
-        }
-        emu->port1_output_pipe_fd = fileno(emu->port1_output_pipe);
-    }
-    return true;
-}
-
-static bool closeDioPipes(Emulator* const emu)
-{
-    if (emu->port1_output_pipe != NULL)
-    {
-        fclose(emu->port1_output_pipe);
-        emu->port1_output_pipe = NULL;
-        emu->port1_output_pipe_fd = -1;
-    }
-    return true;
 }
 
 static void handleCommanding(Emulator* const emu)
@@ -225,18 +124,6 @@ int mainInernal(int argc, char *argv[], Emulator* const emu)
 
     register_signal(SIGINT); // Register Callback for CONTROL-c
 
-    if (!openUsciPipes(emu))
-    {
-        closeUsciPipes(emu);
-        return -1;
-    }
-
-    if (!openDioPipes(emu))
-    {
-        closeDioPipes(emu);
-        return -1;
-    }
-
     cpu->running = emu->start_running;
     if (!cpu->running) {
         // display first round of registers
@@ -252,8 +139,6 @@ int mainInernal(int argc, char *argv[], Emulator* const emu)
         handleProcessingStep(emu);
     }
 
-    closeUsciPipes(emu);
-    closeDioPipes(emu);
     deinitializeMsp430(emu);
     return 0;
 }

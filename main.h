@@ -49,10 +49,6 @@ typedef struct Status_reg Status_reg;
 typedef struct Debugger Debugger;
 typedef struct Packet Packet;
 
-#include "devices/peripherals/bcm.h"
-#include "devices/peripherals/timer_a.h"
-#include "devices/peripherals/port1.h"
-#include "devices/peripherals/usci.h"
 #include "devices/cpu/registers.h"
 #include "devices/utilities.h"
 #include "devices/memory/memspace.h"
@@ -67,15 +63,6 @@ struct Emulator
     Debugger *debugger;
     char* binary;
     int port;
-    char* usci_input_pipe_name;
-    char* usci_output_pipe_name;
-    FILE* usci_input_pipe;
-    FILE* usci_output_pipe;
-    int usci_input_pipe_fd;
-    int usci_output_pipe_fd;
-    char* port1_output_pipe_name;
-    FILE* port1_output_pipe;
-    int port1_output_pipe_fd;
     bool do_trace;
     bool start_running;
 };

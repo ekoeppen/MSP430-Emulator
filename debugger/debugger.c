@@ -73,11 +73,6 @@ bool exec_cmd (Emulator *emu, char *line, int len)
           break;
         decode(emu, fetch(emu, true), EXECUTE);
 
-        // Handle Peripherals
-        handle_bcm(emu);
-        handle_timer_a(emu);
-        handle_port_1(emu);
-        handle_usci(emu);
         if (emu->debugger->error != 0)
           break;
       }
