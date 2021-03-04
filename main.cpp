@@ -211,13 +211,6 @@ static void handleProcessingStep(Emulator* const emu)
         return;
     // Instruction Decoder
     decode(emu, fetch(emu, true), EXECUTE);
-    // Handle Peripherals
-    handle_bcm(emu);
-    handle_timer_a(emu);
-    handle_port_1(emu);
-    handle_usci(emu);
-    // Average of 4 cycles per instruction
-    mclk_wait_cycles(emu, 4);
 }
 
 int mainInernal(int argc, char *argv[], Emulator* const emu)
